@@ -1,0 +1,50 @@
+name: Build NixOS VM and Upload Release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build_and_upload:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write 
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set Short Commit SHA
+      run: echo "SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
+
+    - name: Install Nix (Flake Mode)
+      uses: cachix/install-nix-action@v27
+
+    - name: Build NixOS VM
+      run: |
+        nix flake update
+        nix build .#nixosConfigurations.YANDEX-VM.config.system.build.vm
+
+    - name: Locate QCOW2 file
+      id: locate_file
+      run: |
+        QCOW2_PATH=$(cat ./result/bin/* | grep nixos-disk-image/nixos.qcow2 | cut -d" " -f 4)
+        if [ -z "$QCOW2_PATH" ]; then
+          echo "Error: QCOW2 file not found in ./result/qemu-vm/"
+          exit 1
+        fi
+        echo "Successfully located: $QCOW2_PATH"
+        echo "QCOW2_PATH=$QCOW2_PATH" >> $GITHUB_OUTPUT
+
+    - name: Create GitHub Release and Upload QCOW2
+      uses: softprops/action-gh-release@v2
+      with:
+        files: ${{ steps.locate_file.outputs.QCOW2_PATH }}
+        tag_name: 'build-${{ env.SHORT_SHA }}' # MUST be unique; using short SHA ensures this.
+        name: Release-${{ env.SHORT_SHA }}
+        body: |
+          Automated NixOS VM build (QCOW2 format) for commit ${{ github.sha }}.
+          Built manually via workflow dispatch.
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
