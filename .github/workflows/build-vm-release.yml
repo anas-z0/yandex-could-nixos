@@ -33,7 +33,6 @@ jobs:
           exit 1
         fi
         echo "Successfully located: $QCOW2_PATH"
-        echo "QCOW2_PATH=$QCOW2_PATH" >> $GITHUB_OUTPUT
 
     - name: Create GitHub Release and Upload QCOW2
       uses: softprops/action-gh-release@v2
