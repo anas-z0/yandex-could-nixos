@@ -12,10 +12,6 @@
             virtualisation = {
               useBIOSBoot = true;
               useBootLoader = true;
-              fileSystems."/" = {
-                fsType = "btrfs";
-                options = [ "compress=zstd:3" "noatime" "autodefrag" ];
-              };
             };
           };
           boot.kernelParams = [ "console=ttyS0" ];
