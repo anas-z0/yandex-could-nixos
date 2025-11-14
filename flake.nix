@@ -7,7 +7,7 @@
       modules = [ ({config, pkgs, ...}: {
         nixpkgs.hostPlatform = "x86_64-linux";
         networking.hostName = "YANDEX-VM";
-        virtualisation = {
+        virtualisation.vmVariant = {
           useBIOSBoot = true;
           useBootLoader = true;
           fileSystems."/" = {
