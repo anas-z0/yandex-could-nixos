@@ -15,7 +15,7 @@
             };
           };
           boot.kernelParams = [ "console=ttyS0" ];
-          users.extraUsers.root.password = "anasisveryshort";
+          users.extraUsers.root.password = "anasisverytall";
           services = {
             cloud-init = { enable = true; };
             openssh = {
